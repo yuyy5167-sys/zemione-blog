@@ -1,0 +1,31 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../../../../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog', ({ data }) => !data.draft);
+
+	return posts.map((post) => {
+		const d = post.data.date;
+		const year = String(d.getUTCFullYear());
+		const month = String(d.getUTCMonth() + 1).padStart(2, '0');
+		const day = String(d.getUTCDate()).padStart(2, '0');
+
+		return {
+			params: { year, month, day, slug: post.id },
+			props: { post },
+		};
+	});
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Base title={post.data.title}>
+	<article>
+		<h1>{post.data.title}</h1>
+		<p><time>{post.data.date.toLocaleDateString('ja-JP')}</time></p>
+		<Content />
+	</article>
+</Base>
